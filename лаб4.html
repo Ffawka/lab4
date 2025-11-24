@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #2a2a2a;
+            --secondary: #1a1a1a;
+            --accent: #ff3366;
+            --accent-light: #ff6699;
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --grid: rgba(255, 255, 255, 0.05);
+            --axis: rgba(255, 255, 255, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 51, 102, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(102, 153, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 153, 51, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            font-style: italic;
+            letter-spacing: 0.1rem;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .controls {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .controls::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        .canvas-container {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-light);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 1px;
+            background: var(--accent);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.7rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        button {
+            padding: 0.8rem;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+        }
+        
+        #draw-btn {
+            background: rgba(255, 51, 102, 0.1);
+            border-color: var(--accent);
+        }
+        
+        #draw-btn:hover {
+            background: rgba(255, 51, 102, 0.2);
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+        
+        .algorithm-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.2rem;
+            border-left: 3px solid var(--accent);
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .algorithm-info p {
+            margin-bottom: 0.8rem;
+        }
+        
+        canvas {
+            display: block;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .coordinates-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .performance {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+        
+        .performance h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-light);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .performance-item {
+            text-align: center;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .performance-value {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin: 0.3rem 0;
+        }
+        
+        .performance-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        
+        .art-decoration {
+            position: absolute;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .decoration-1 {
+            top: 10%;
+            right: 5%;
+            width: 150px;
+            height: 150px;
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            transform: rotate(45deg);
+            animation: float 20s infinite linear;
+        }
+        
+        .decoration-2 {
+            bottom: 15%;
+            left: 5%;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 1px solid rgba(102, 153, 255, 0.2);
+            animation: float 15s infinite linear reverse;
+        }
+        
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div class="art-decoration decoration-1"></div>
+    <div class="art-decoration decoration-2"></div>
+    
+    <div class="container">
+        <div class="content">
+            <div class="controls">
+                <div class="control-group">
+                    <h2>Параметры отрисовки</h2>
+                    <label for="algorithm">Выберите алгоритм:</label>
+                    <select id="algorithm">
+                        <option value="step">Пошаговый алгоритм</option>
+                        <option value="dda">Алгоритм ЦДА</option>
+                        <option value="bresenham">Алгоритм Брезенхема (отрезок)</option>
+                        <option value="circle">Алгоритм Брезенхема (окружность)</option>
+                        <option value="wu">Алгоритм Ву (сглаживание)</option>
+                    </select>
+                    
+                    <div id="line-controls">
+                        <label for="x1">Начальная точка X1:</label>
+                        <input type="number" id="x1" value="5">
+                        
+                        <label for="y1">Начальная точка Y1:</label>
+                        <input type="number" id="y1" value="5">
+                        
+                        <label for="x2">Конечная точка X2:</label>
+                        <input type="number" id="x2" value="12">
+                        
+                        <label for="y2">Конечная точка Y2:</label>
+                        <input type="number" id="y2" value="10">
+                    </div>
+                    
+                    <div id="circle-controls" style="display: none;">
+                        <label for="cx">Центр окружности X:</label>
+                        <input type="number" id="cx" value="0">
+                        
+                        <label for="cy">Центр окружности Y:</label>
+                        <input type="number" id="cy" value="0">
+                        
+                        <label for="radius">Радиус окружности:</label>
+                        <input type="number" id="radius" value="8">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="draw-btn">Нарисовать</button>
+                        <button id="clear-btn">Очистить холст</button>
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <h2>Описание алгоритма</h2>
+                    <div id="step-info">
+                        <p><strong>Пошаговый алгоритм:</strong> Простейший алгоритм для отрисовки отрезков. Вычисляет координаты точек отрезка с помощью уравнения прямой y = kx + b.</p>
+                        <p>Преимущества: простота реализации.</p>
+                        <p>Недостатки: использование вещественной арифметики, низкая производительность.</p>
+                    </div>
+                    <div id="dda-info" style="display: none;">
+                        <p><strong>Алгоритм ЦДА (Цифровой Дифференциальный Анализатор):</strong> Улучшенная версия пошагового алгоритма. Использует приращения для вычисления координат.</p>
+                        <p>Преимущества: проще в реализации, чем алгоритм Брезенхема.</p>
+                        <p>Недостатки: все еще использует вещественную арифметику.</p>
+                    </div>
+                    <div id="bresenham-info" style="display: none;">
+                        <p><strong>Алгоритм Брезенхема (отрезок):</strong> Эффективный алгоритм, использующий только целочисленную арифметику. Определяет, какие пиксели лучше аппроксимируют отрезок.</p>
+                        <p>Преимущества: высокая скорость, целочисленные вычисления.</p>
+                        <p>Недостатки: более сложная реализация.</p>
+                    </div>
+                    <div id="circle-info" style="display: none;">
+                        <p><strong>Алгоритм Брезенхема (окружность):</strong> Специализированный алгоритм для отрисовки окружностей. Использует симметрию окружности для оптимизации вычислений.</p>
+                        <p>Преимущества: эффективность, целочисленные вычисления.</p>
+                        <p>Недостатки: работает только для окружностей.</p>
+                    </div>
+                    <div id="wu-info" style="display: none;">
+                        <p><strong>Алгоритм Ву (сглаживание):</strong> Алгоритм построения отрезков со сглаживанием (антиалиасингом). Использует весовые коэффициенты для плавного перехода между пикселями.</p>
+                        <p>Преимущества: высокое качество изображения, сглаживание ступенчатости.</p>
+                        <p>Недостатки: более сложные вычисления, использование вещественной арифметики.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <h2>Область визуализации</h2>
+                <canvas id="canvas" width="600" height="600"></canvas>
+                
+                <div class="coordinates-info">
+                    <div>Центр координат: (300, 300)</div>
+                    <div>Масштаб: 10 пикселей на единицу</div>
+                    <div>Размер сетки: 20×20 пикселей</div>
+                </div>
+                
+                <div class="performance">
+                    <h3>Временные характеристики алгоритмов</h3>
+                    <div class="performance-grid">
+                        <div class="performance-item">
+                            <div class="performance-label">Пошаговый</div>
+                            <div class="performance-value" id="step-time">-</div>
+                            <div class="performance-label" id="step-points">- точек</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">ЦДА</div>
+                            <div class="performance-value" id="dda-time">-</div>
+                            <div class="performance-label" id="dda-points">- точек</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Брезенхема (отрезок)</div>
+                            <div class="performance-value" id="bresenham-time">-</div>
+                            <div class="performance-label" id="bresenham-points">- точек</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Брезенхема (окружность)</div>
+                            <div class="performance-value" id="circle-time">-</div>
+                            <div class="performance-label" id="circle-points">- точек</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="performance-label">Ву (сглаживание)</div>
+                            <div class="performance-value" id="wu-time">-</div>
+                            <div class="performance-label" id="wu-points">- точек</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Лабораторная работа по Алгоритмам растеризации. Алгоритмы построения отрезков и окружностей</p>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const algorithmSelect = document.getElementById('algorithm');
+        const drawBtn = document.getElementById('draw-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const lineControls = document.getElementById('line-controls');
+        const circleControls = document.getElementById('circle-controls');
+        const algorithmInfos = document.querySelectorAll('.algorithm-info > div');
+        
+        const stepTime = document.getElementById('step-time');
+        const ddaTime = document.getElementById('dda-time');
+        const bresenhamTime = document.getElementById('bresenham-time');
+        const circleTime = document.getElementById('circle-time');
+        const wuTime = document.getElementById('wu-time');
+        const stepPoints = document.getElementById('step-points');
+        const ddaPoints = document.getElementById('dda-points');
+        const bresenhamPoints = document.getElementById('bresenham-points');
+        const circlePoints = document.getElementById('circle-points');
+        const wuPoints = document.getElementById('wu-points');
+        
+        const performanceData = {
+            step: { time: 0, points: 0 },
+            dda: { time: 0, points: 0 },
+            bresenham: { time: 0, points: 0 },
+            circle: { time: 0, points: 0 },
+            wu: { time: 0, points: 0 }
+        };
+        
+        const centerX = 300;
+        const centerY = 300;
+        
+        function initCanvas() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawGrid();
+            drawAxes();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = 'var(--grid)';
+            ctx.lineWidth = 0.5;
+
+            for (let x = 0; x <= canvas.width; x += 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= canvas.height; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+            for (let x = 0; x <= canvas.width; x += 5) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= canvas.height; y += 5) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+        
+        function drawAxes() {
+            ctx.strokeStyle = 'var(--axis)';
+            ctx.lineWidth = 1;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+
+            ctx.fillStyle = 'var(--text)';
+
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 10, centerY - 5);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.lineTo(canvas.width - 10, centerY + 5);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - 5, 10);
+            ctx.lineTo(centerX, 0);
+            ctx.lineTo(centerX + 5, 10);
+            ctx.fill();
+            
+            ctx.font = '12px "Courier New"';
+            ctx.fillText('X', canvas.width - 15, centerY - 10);
+            ctx.fillText('Y', centerX + 10, 15);
+            
+            ctx.font = '10px "Courier New"';
+            ctx.fillStyle = 'var(--text-dim)';
+            
+            for (let x = centerX + 20; x < canvas.width; x += 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - 3);
+                ctx.lineTo(x, centerY + 3);
+                ctx.stroke();
+                ctx.fillText(((x - centerX) / 10).toString(), x - 5, centerY + 15);
+            }
+            
+            for (let x = centerX - 20; x > 0; x -= 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - 3);
+                ctx.lineTo(x, centerY + 3);
+                ctx.stroke();
+                ctx.fillText(((x - centerX) / 10).toString(), x - 8, centerY + 15);
+            }
+            
+            for (let y = centerY + 20; y < canvas.height; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(centerX - 3, y);
+                ctx.lineTo(centerX + 3, y);
+                ctx.stroke();
+                ctx.fillText(((centerY - y) / 10).toString(), centerX + 8, y + 3);
+            }
+            
+            for (let y = centerY - 20; y > 0; y -= 20) {
+                ctx.beginPath();
+                ctx.moveTo(centerX - 3, y);
+                ctx.lineTo(centerX + 3, y);
+                ctx.stroke();
+                ctx.fillText(((centerY - y) / 10).toString(), centerX + 8, y + 3);
+            }
+
+            ctx.fillText('0', centerX + 5, centerY + 15);
+        }
+        
+        function toCanvasCoords(x, y) {
+            return {
+                x: centerX + x * 10,
+                y: centerY - y * 10
+            };
+        }
+        
+        function drawPoint(x, y, color = '#ff3366', size = 3) {
+            const coords = toCanvasCoords(x, y);
+            ctx.fillStyle = color;
+            ctx.fillRect(coords.x - Math.floor(size/2), coords.y - Math.floor(size/2), size, size);
+        }
+
+        function setPixel(x, y, brightness = 1) {
+            const coords = toCanvasCoords(x, y);
+            ctx.fillStyle = `rgba(255, 51, 102, ${brightness})`;
+            ctx.fillRect(coords.x, coords.y, 1, 1);
+        }
+
+        function stepAlgorithm(x1, y1, x2, y2) {
+            const startTime = performance.now();
+            const points = [];
+            
+            const k = (y2 - y1) / (x2 - x1);
+            const b = y1 - k * x1;
+
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            
+            if (dx >= dy) {
+                const step = (x2 > x1) ? 1 : -1;
+                for (let x = x1; x !== x2 + step; x += step) {
+                    const y = k * x + b; 
+                    points.push({x, y: Math.round(y)});
+                    drawPoint(x, Math.round(y), '#ff3366', 3);
+                }
+            } else {
+                const step = (y2 > y1) ? 1 : -1;
+                for (let y = y1; y !== y2 + step; y += step) {
+                    const x = (y - b) / k; 
+                    points.push({x: Math.round(x), y});
+                    drawPoint(Math.round(x), y, '#ff3366', 3);
+                }
+            }
+            
+            const endTime = performance.now();
+            performanceData.step.time = endTime - startTime;
+            performanceData.step.points = points.length;
+            
+            return points;
+        }
+
+        function ddaAlgorithm(x1, y1, x2, y2) {
+            const startTime = performance.now();
+            const points = [];
+            
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+
+            const steps = Math.max(Math.abs(dx), Math.abs(dy));
+
+            const xIncrement = dx / steps;
+            const yIncrement = dy / steps;
+            
+            let x = x1;
+            let y = y1;
+            
+            points.push({x: Math.round(x), y: Math.round(y)});
+            drawPoint(Math.round(x), Math.round(y), '#ff9933', 3);
+
+            for (let i = 0; i < steps; i++) {
+                x += xIncrement;
+                y += yIncrement;
+                points.push({x: Math.round(x), y: Math.round(y)});
+                drawPoint(Math.round(x), Math.round(y), '#ff9933', 3);
+            }
+            
+            const endTime = performance.now();
+            performanceData.dda.time = endTime - startTime;
+            performanceData.dda.points = points.length;
+            
+            return points;
+        }
+
+        function bresenhamLine(x1, y1, x2, y2) {
+            const startTime = performance.now();
+            const points = [];
+            
+            let x = x1;
+            let y = y1;
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const sx = (x1 < x2) ? 1 : -1;
+            const sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+            
+            points.push({x, y});
+            drawPoint(x, y, '#33ccff', 3);
+            
+            while (x !== x2 || y !== y2) {
+                const e2 = 2 * err;
+                
+                if (e2 > -dy) {
+                    err -= dy;
+                    x += sx;
+                }
+                
+                if (e2 < dx) {
+                    err += dx;
+                    y += sy;
+                }
+                
+                points.push({x, y});
+                drawPoint(x, y, '#33ccff', 3);
+            }
+            
+            const endTime = performance.now();
+            performanceData.bresenham.time = endTime - startTime;
+            performanceData.bresenham.points = points.length;
+            
+            return points;
+        }
+
+        function bresenhamCircle(cx, cy, radius) {
+            const startTime = performance.now();
+            const points = [];
+            
+            let x = 0;
+            let y = radius;
+            let d = 3 - 2 * radius;
+            
+            const drawCirclePoints = (xc, yc, x, y) => {
+                const pointsToDraw = [
+                    {x: xc + x, y: yc + y},
+                    {x: xc - x, y: yc + y},
+                    {x: xc + x, y: yc - y},
+                    {x: xc - x, y: yc - y},
+                    {x: xc + y, y: yc + x},
+                    {x: xc - y, y: yc + x},
+                    {x: xc + y, y: yc - x},
+                    {x: xc - y, y: yc - x}
+                ];
+                
+                pointsToDraw.forEach(point => {
+                    points.push(point);
+                    drawPoint(point.x, point.y, '#cc66ff', 3);
+                });
+            };
+            
+            drawCirclePoints(cx, cy, x, y);
+            
+            while (y >= x) {
+                x++;
+                
+                if (d > 0) {
+                    y--;
+                    d = d + 4 * (x - y) + 10;
+                } else {
+                    d = d + 4 * x + 6;
+                }
+                
+                drawCirclePoints(cx, cy, x, y);
+            }
+            
+            const endTime = performance.now();
+            performanceData.circle.time = endTime - startTime;
+            performanceData.circle.points = points.length;
+            
+            return points;
+        }
+
+        function wuLine(x1, y1, x2, y2) {
+            const startTime = performance.now();
+            const points = [];
+            
+            const ipart = (x) => Math.floor(x);
+            const round = (x) => Math.round(x);
+            const fpart = (x) => x - Math.floor(x);
+            const rfpart = (x) => 1 - fpart(x);
+            
+            const steep = Math.abs(y2 - y1) > Math.abs(x2 - x1);
+            
+            let swapTemp;
+            if (steep) {
+                swapTemp = x1; x1 = y1; y1 = swapTemp;
+                swapTemp = x2; x2 = y2; y2 = swapTemp;
+            }
+            if (x1 > x2) {
+                swapTemp = x1; x1 = x2; x2 = swapTemp;
+                swapTemp = y1; y1 = y2; y2 = swapTemp;
+            }
+            
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            
+            if (dx === 0) {
+                // Вертикальная линия
+                const yStart = Math.min(y1, y2);
+                const yEnd = Math.max(y1, y2);
+                for (let y = yStart; y <= yEnd; y++) {
+                    points.push({x: x1, y});
+                    drawPoint(x1, y, '#ff3366', 3);
+                }
+            } else {
+                const gradient = dy / dx;
+                
+                let xend = round(x1);
+                let yend = y1 + gradient * (xend - x1);
+                let xgap = rfpart(x1 + 0.5);
+                let xpxl1 = xend;
+                let ypxl1 = ipart(yend);
+                
+                if (steep) {
+                    points.push({x: ypxl1, y: xpxl1});
+                    setPixel(ypxl1, xpxl1, rfpart(yend) * xgap);
+                    points.push({x: ypxl1 + 1, y: xpxl1});
+                    setPixel(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
+                } else {
+                    points.push({x: xpxl1, y: ypxl1});
+                    setPixel(xpxl1, ypxl1, rfpart(yend) * xgap);
+                    points.push({x: xpxl1, y: ypxl1 + 1});
+                    setPixel(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+                }
+                
+                let intery = yend + gradient;
+                
+                xend = round(x2);
+                yend = y2 + gradient * (xend - x2);
+                xgap = fpart(x2 + 0.5);
+                let xpxl2 = xend;
+                let ypxl2 = ipart(yend);
+                
+                if (steep) {
+                    points.push({x: ypxl2, y: xpxl2});
+                    setPixel(ypxl2, xpxl2, rfpart(yend) * xgap);
+                    points.push({x: ypxl2 + 1, y: xpxl2});
+                    setPixel(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
+                } else {
+                    points.push({x: xpxl2, y: ypxl2});
+                    setPixel(xpxl2, ypxl2, rfpart(yend) * xgap);
+                    points.push({x: xpxl2, y: ypxl2 + 1});
+                    setPixel(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+                }
+                
+                if (steep) {
+                    for (let x = xpxl1 + 1; x < xpxl2; x++) {
+                        points.push({x: ipart(intery), y: x});
+                        setPixel(ipart(intery), x, rfpart(intery));
+                        points.push({x: ipart(intery) + 1, y: x});
+                        setPixel(ipart(intery) + 1, x, fpart(intery));
+                        intery += gradient;
+                    }
+                } else {
+                    for (let x = xpxl1 + 1; x < xpxl2; x++) {
+                        points.push({x: x, y: ipart(intery)});
+                        setPixel(x, ipart(intery), rfpart(intery));
+                        points.push({x: x, y: ipart(intery) + 1});
+                        setPixel(x, ipart(intery) + 1, fpart(intery));
+                        intery += gradient;
+                    }
+                }
+            }
+            
+            const endTime = performance.now();
+            performanceData.wu.time = endTime - startTime;
+            performanceData.wu.points = points.length;
+            
+            return points;
+        }
+        
+        function updateAlgorithmInfo() {
+            const algorithm = algorithmSelect.value;
+            
+            algorithmInfos.forEach(info => {
+                info.style.display = 'none';
+            });
+
+            document.getElementById(`${algorithm}-info`).style.display = 'block';
+
+            if (algorithm === 'circle') {
+                lineControls.style.display = 'none';
+                circleControls.style.display = 'block';
+            } else {
+                lineControls.style.display = 'block';
+                circleControls.style.display = 'none';
+            }
+        }
+        
+        function updatePerformanceTable() {
+            stepTime.textContent = performanceData.step.time.toFixed(2) + 'мс';
+            ddaTime.textContent = performanceData.dda.time.toFixed(2) + 'мс';
+            bresenhamTime.textContent = performanceData.bresenham.time.toFixed(2) + 'мс';
+            circleTime.textContent = performanceData.circle.time.toFixed(2) + 'мс';
+            wuTime.textContent = performanceData.wu.time.toFixed(2) + 'мс';
+            
+            stepPoints.textContent = performanceData.step.points + ' точек';
+            ddaPoints.textContent = performanceData.dda.points + ' точек';
+            bresenhamPoints.textContent = performanceData.bresenham.points + ' точек';
+            circlePoints.textContent = performanceData.circle.points + ' точек';
+            wuPoints.textContent = performanceData.wu.points + ' точек';
+        }
+
+        drawBtn.addEventListener('click', () => {
+            const algorithm = algorithmSelect.value;
+
+            initCanvas();
+            
+            if (algorithm === 'circle') {
+                const cx = parseInt(document.getElementById('cx').value) || 0;
+                const cy = parseInt(document.getElementById('cy').value) || 0;
+                const radius = parseInt(document.getElementById('radius').value) || 8;
+                
+                bresenhamCircle(cx, cy, radius);
+            } else {
+                const x1 = parseInt(document.getElementById('x1').value) || 0;
+                const y1 = parseInt(document.getElementById('y1').value) || 0;
+                const x2 = parseInt(document.getElementById('x2').value) || 0;
+                const y2 = parseInt(document.getElementById('y2').value) || 0;
+                
+                try {
+                    switch (algorithm) {
+                        case 'step':
+                            stepAlgorithm(x1, y1, x2, y2);
+                            break;
+                        case 'dda':
+                            ddaAlgorithm(x1, y1, x2, y2);
+                            break;
+                        case 'bresenham':
+                            bresenhamLine(x1, y1, x2, y2);
+                            break;
+                        case 'wu':
+                            wuLine(x1, y1, x2, y2);
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отрисовке:', error);
+                    alert('Произошла ошибка при отрисовке. Проверьте параметры.');
+                }
+            }
+
+            updatePerformanceTable();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            initCanvas();
+
+            Object.keys(performanceData).forEach(key => {
+                performanceData[key].time = 0;
+                performanceData[key].points = 0;
+            });
+            
+            updatePerformanceTable();
+        });
+
+        algorithmSelect.addEventListener('change', updateAlgorithmInfo);
+
+        window.addEventListener('load', () => {
+            initCanvas();
+            updateAlgorithmInfo();
+            updatePerformanceTable();
+        });
+    </script>
+</body>
+</html>
